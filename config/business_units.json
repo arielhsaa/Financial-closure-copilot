@@ -1,0 +1,56 @@
+{
+  "business_units": {
+    "NA": {
+      "name": "North America",
+      "region": "Americas",
+      "currency": "USD",
+      "contact": "na.finance@company.com",
+      "reporting_deadline_days": 2,
+      "time_zone": "America/New_York",
+      "fiscal_calendar": "standard",
+      "segments": ["Product", "Geography", "Customer", "Channel"]
+    },
+    "EMEA": {
+      "name": "Europe, Middle East, Africa",
+      "region": "EMEA",
+      "currency": "EUR",
+      "contact": "emea.finance@company.com",
+      "reporting_deadline_days": 2,
+      "time_zone": "Europe/London",
+      "fiscal_calendar": "standard",
+      "segments": ["Product", "Geography", "Customer", "Channel"]
+    },
+    "APAC": {
+      "name": "Asia Pacific",
+      "region": "APAC",
+      "currency": "SGD",
+      "contact": "apac.finance@company.com",
+      "reporting_deadline_days": 3,
+      "time_zone": "Asia/Singapore",
+      "fiscal_calendar": "standard",
+      "segments": ["Product", "Geography", "Customer", "Channel"]
+    },
+    "LATAM": {
+      "name": "Latin America",
+      "region": "Americas",
+      "currency": "BRL",
+      "contact": "latam.finance@company.com",
+      "reporting_deadline_days": 2,
+      "time_zone": "America/Sao_Paulo",
+      "fiscal_calendar": "standard",
+      "segments": ["Product", "Geography", "Customer", "Channel"]
+    }
+  },
+  "segments": {
+    "Product": ["Hardware", "Software", "Services", "Subscriptions"],
+    "Geography": ["North", "South", "East", "West", "Central"],
+    "Customer": ["Enterprise", "SMB", "Consumer"],
+    "Channel": ["Direct", "Partner", "Online", "Retail"]
+  },
+  "accounts": {
+    "revenue": ["4000", "4100", "4200", "4300"],
+    "cogs": ["5000", "5100", "5200"],
+    "opex": ["6000", "6100", "6200", "6300", "6400"],
+    "other": ["7000", "7100", "8000", "8100"]
+  }
+}

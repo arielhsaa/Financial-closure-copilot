@@ -1,0 +1,187 @@
+{
+  "name": "Financial_Closure_Automation",
+  "description": "Automated financial closure process with intelligent agents",
+  "tags": {
+    "project": "financial-closure-copilot",
+    "environment": "production",
+    "version": "1.0"
+  },
+  "email_notifications": {
+    "on_start": ["finance.ops@company.com"],
+    "on_success": ["finance.ops@company.com"],
+    "on_failure": ["finance.ops@company.com", "tech.ops@company.com"]
+  },
+  "timeout_seconds": 0,
+  "max_concurrent_runs": 1,
+  "format": "MULTI_TASK",
+  "tasks": [
+    {
+      "task_key": "initialize_environment",
+      "description": "Initialize Unity Catalog and schemas",
+      "notebook_task": {
+        "notebook_path": "/Workspace/Financial-closure-copilot/setup/00_initialize_environment",
+        "source": "WORKSPACE"
+      },
+      "job_cluster_key": "closure_cluster",
+      "timeout_seconds": 1800,
+      "max_retries": 2,
+      "min_retry_interval_millis": 60000
+    },
+    {
+      "task_key": "create_tables",
+      "description": "Create all Delta tables",
+      "depends_on": [
+        {
+          "task_key": "initialize_environment"
+        }
+      ],
+      "notebook_task": {
+        "notebook_path": "/Workspace/Financial-closure-copilot/setup/01_create_tables",
+        "source": "WORKSPACE"
+      },
+      "job_cluster_key": "closure_cluster",
+      "timeout_seconds": 1800,
+      "max_retries": 2
+    },
+    {
+      "task_key": "setup_agents",
+      "description": "Register and configure agents",
+      "depends_on": [
+        {
+          "task_key": "create_tables"
+        }
+      ],
+      "notebook_task": {
+        "notebook_path": "/Workspace/Financial-closure-copilot/setup/02_setup_agents",
+        "source": "WORKSPACE"
+      },
+      "job_cluster_key": "closure_cluster",
+      "timeout_seconds": 1800,
+      "max_retries": 2
+    },
+    {
+      "task_key": "simulate_exchange_rates",
+      "description": "Generate simulated exchange rate data",
+      "depends_on": [
+        {
+          "task_key": "setup_agents"
+        }
+      ],
+      "notebook_task": {
+        "notebook_path": "/Workspace/Financial-closure-copilot/data_simulation/01_simulate_exchange_rates",
+        "source": "WORKSPACE"
+      },
+      "job_cluster_key": "closure_cluster",
+      "timeout_seconds": 1800
+    },
+    {
+      "task_key": "simulate_bu_preliminary",
+      "description": "Generate BU preliminary data",
+      "depends_on": [
+        {
+          "task_key": "simulate_exchange_rates"
+        }
+      ],
+      "notebook_task": {
+        "notebook_path": "/Workspace/Financial-closure-copilot/data_simulation/02_simulate_bu_preliminary",
+        "source": "WORKSPACE"
+      },
+      "job_cluster_key": "closure_cluster",
+      "timeout_seconds": 1800
+    },
+    {
+      "task_key": "simulate_accounting_cuts",
+      "description": "Generate accounting cuts",
+      "depends_on": [
+        {
+          "task_key": "simulate_bu_preliminary"
+        }
+      ],
+      "notebook_task": {
+        "notebook_path": "/Workspace/Financial-closure-copilot/data_simulation/03_simulate_accounting_cuts",
+        "source": "WORKSPACE"
+      },
+      "job_cluster_key": "closure_cluster",
+      "timeout_seconds": 1800
+    },
+    {
+      "task_key": "simulate_segmented_files",
+      "description": "Generate segmented files",
+      "depends_on": [
+        {
+          "task_key": "simulate_accounting_cuts"
+        }
+      ],
+      "notebook_task": {
+        "notebook_path": "/Workspace/Financial-closure-copilot/data_simulation/04_simulate_segmented_files",
+        "source": "WORKSPACE"
+      },
+      "job_cluster_key": "closure_cluster",
+      "timeout_seconds": 1800
+    },
+    {
+      "task_key": "simulate_forecast_files",
+      "description": "Generate forecast files",
+      "depends_on": [
+        {
+          "task_key": "simulate_segmented_files"
+        }
+      ],
+      "notebook_task": {
+        "notebook_path": "/Workspace/Financial-closure-copilot/data_simulation/05_simulate_forecast_files",
+        "source": "WORKSPACE"
+      },
+      "job_cluster_key": "closure_cluster",
+      "timeout_seconds": 1800
+    },
+    {
+      "task_key": "run_closure_orchestrator",
+      "description": "Execute full closure cycle with intelligent agents",
+      "depends_on": [
+        {
+          "task_key": "simulate_forecast_files"
+        }
+      ],
+      "notebook_task": {
+        "notebook_path": "/Workspace/Financial-closure-copilot/agents/agent_orchestrator",
+        "source": "WORKSPACE",
+        "base_parameters": {
+          "mode": "full"
+        }
+      },
+      "job_cluster_key": "closure_cluster",
+      "timeout_seconds": 7200,
+      "max_retries": 1,
+      "min_retry_interval_millis": 300000
+    }
+  ],
+  "job_clusters": [
+    {
+      "job_cluster_key": "closure_cluster",
+      "new_cluster": {
+        "spark_version": "14.3.x-scala2.12",
+        "node_type_id": "Standard_DS3_v2",
+        "num_workers": 2,
+        "spark_env_vars": {
+          "PYSPARK_PYTHON": "/databricks/python3/bin/python3"
+        },
+        "spark_conf": {
+          "spark.databricks.delta.preview.enabled": "true",
+          "spark.databricks.delta.properties.defaults.enableChangeDataFeed": "true"
+        },
+        "azure_attributes": {
+          "availability": "ON_DEMAND_AZURE",
+          "first_on_demand": 1
+        },
+        "enable_elastic_disk": true,
+        "data_security_mode": "USER_ISOLATION",
+        "runtime_engine": "STANDARD"
+      }
+    }
+  ],
+  "schedule": {
+    "quartz_cron_expression": "0 0 1 * * ?",
+    "timezone_id": "UTC",
+    "pause_status": "PAUSED"
+  }
+}
